@@ -9,10 +9,13 @@ public class itemcollector : MonoBehaviour
 
     [SerializeField] private Text point_text;
 
+    [SerializeField] private AudioSource collectionSoundEffect;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("points")) 
         {
+            collectionSoundEffect.Play(); 
             Destroy(collision.gameObject);
             pointcount++;
             point_text.text = "Truskawki: " + pointcount;
