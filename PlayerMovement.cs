@@ -11,8 +11,11 @@ public class PlayerMovement : MonoBehaviour
     private float dirX = 0f;
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private float sprint = 4f;
     private enum MovementState { idle, running, jumping, falling }
     private bool isJumping = false;
+    private bool isSprinting = false;
+    private bool isGrounded = false;
 
     [SerializeField] private AudioSource JumpSoundEffect;
 
@@ -28,7 +31,7 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         dirX = Input.GetAxisRaw("Horizontal");
-        rb.velocity = new Vector2(dirX * moveSpeed, rb.velocity.y);
+        rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
         if (Input.GetButtonDown("Jump") && !isJumping)
         {
@@ -37,7 +40,19 @@ public class PlayerMovement : MonoBehaviour
             isJumping = true;
         }
 
+            if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
+            {
+                isSprinting = true;
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                isSprinting = false;
+            }
+
+
         UpdateAnimationState();
+
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -45,6 +60,19 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
+        }
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isJumping = false;
+            isGrounded = true;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false; 
         }
     }
 

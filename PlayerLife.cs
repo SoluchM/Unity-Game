@@ -27,7 +27,7 @@ public class PlayerLife : MonoBehaviour
     private void Die()
     {
         dieSoundEffect.Play();
-        rb.bodyType = RigidbodyType2D.Static;
+        rb.simulated = false;
         anim.SetTrigger("Death");
     }
 
