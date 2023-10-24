@@ -12,10 +12,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpForce = 12f;
     [SerializeField] private float sprint = 4f;
-    private enum MovementState { idle, running, jumping, falling }
-    private bool isJumping = false;
+    private enum MovementState { idle, running, jumping, falling, doublejump}
     private bool isSprinting = false;
     private bool isGrounded = false;
+    private int DoubleJump = 0;
 
     [SerializeField] private AudioSource JumpSoundEffect;
 
@@ -33,11 +33,15 @@ public class PlayerMovement : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
-        if (Input.GetButtonDown("Jump") && !isJumping)
+        if (Input.GetButtonDown("Jump"))
         {
-            JumpSoundEffect.Play();
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            isJumping = true;
+            while (DoubleJump < 3)
+            {
+                JumpSoundEffect.Play();
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                DoubleJump++;
+            }
+
         }
 
             if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
@@ -59,12 +63,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            isJumping = false;
-        }
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isJumping = false;
             isGrounded = true;
+            DoubleJump = 0;
         }
     }
 
@@ -72,9 +72,12 @@ public class PlayerMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            isGrounded = false; 
+            isGrounded = false;
+            DoubleJump = 0;
         }
     }
+
+
 
     private void UpdateAnimationState()
     {
@@ -98,6 +101,10 @@ public class PlayerMovement : MonoBehaviour
         if (rb.velocity.y > .1f)
         {
             state = MovementState.jumping;
+            if (DoubleJump > 2 && !isGrounded)
+            {
+                state = MovementState.doublejump;
+            }
         }
         else if (rb.velocity.y < -.1f)
         {
