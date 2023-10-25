@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -12,10 +13,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpForce = 12f;
     [SerializeField] private float sprint = 4f;
-    private enum MovementState { idle, running, jumping, falling, doublejump}
+    private enum MovementState { idle, running, jumping, falling, doublejump, wallstick}
     private bool isSprinting = false;
     private bool isGrounded = false;
     private int DoubleJump = 0;
+    private bool WallStick = false;
+    private GameObject playerObj = null;
+
 
     [SerializeField] private AudioSource JumpSoundEffect;
 
@@ -25,6 +29,9 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+
+        if (playerObj == null)
+            playerObj = GameObject.Find("Player");
     }
 
     // Update is called once per frame
@@ -67,6 +74,20 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
             DoubleJump = 0;
         }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            rb.velocity = new Vector2(playerObj.transform.position.x, 0);
+            rb.gravityScale = 0;
+            DoubleJump = 0;
+            WallStick = true;
+            Debug.Log(WallStick);
+            if (Input.GetButtonDown("Jump"))
+            {
+                    JumpSoundEffect.Play();
+                    rb.velocity = new Vector2(10f, jumpForce);
+            }
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -75,6 +96,12 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = false;
             DoubleJump = 0;
+        }
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            WallStick = false;
+            rb.gravityScale = 2;
+            Debug.Log(WallStick);
         }
     }
 
@@ -99,7 +126,7 @@ public class PlayerMovement : MonoBehaviour
             state = MovementState.idle;
         }
 
-        if (rb.velocity.y > .1f)
+        if (rb.velocity.y > .1f || WallStick == false && !isGrounded)
         {
             state = MovementState.jumping;
             if (DoubleJump > 2 && !isGrounded)
@@ -107,9 +134,13 @@ public class PlayerMovement : MonoBehaviour
                 state = MovementState.doublejump;
             }
         }
-        else if (rb.velocity.y < -.1f)
+        else if (rb.velocity.y < -.1f && WallStick == false)
         {
             state = MovementState.falling;
+        }
+        if(WallStick == true)
+        {
+            state = MovementState.wallstick;
         }
 
         anim.SetInteger("state", (int)state);
