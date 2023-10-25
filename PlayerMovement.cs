@@ -42,15 +42,25 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
         if (Input.GetButtonDown("Jump"))
-        {
-            while (DoubleJump < 3)
+            if (WallStick)
             {
+                rb.gravityScale = 2;
                 JumpSoundEffect.Play();
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                DoubleJump++;
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce -2f);
+                WallStick = false;
             }
+            else
+            {
+                {
+                    while (DoubleJump < 3)
+                    {
+                        JumpSoundEffect.Play();
+                        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                        DoubleJump++;
+                    }
 
-        }
+                }
+            }
 
             if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
             {
@@ -73,6 +83,7 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             DoubleJump = 0;
+            WallStick= false;
         }
 
         if (collision.gameObject.CompareTag("Wall"))
@@ -81,12 +92,6 @@ public class PlayerMovement : MonoBehaviour
             rb.gravityScale = 0;
             DoubleJump = 0;
             WallStick = true;
-            Debug.Log(WallStick);
-            if (Input.GetButtonDown("Jump"))
-            {
-                    JumpSoundEffect.Play();
-                    rb.velocity = new Vector2(10f, jumpForce);
-            }
         }
     }
 
@@ -101,7 +106,6 @@ public class PlayerMovement : MonoBehaviour
         {
             WallStick = false;
             rb.gravityScale = 2;
-            Debug.Log(WallStick);
         }
     }
 
@@ -126,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             state = MovementState.idle;
         }
 
-        if (rb.velocity.y > .1f || WallStick == false && !isGrounded)
+        if (WallStick == false && !isGrounded && rb.velocity.y > .1f)
         {
             state = MovementState.jumping;
             if (DoubleJump > 2 && !isGrounded)
