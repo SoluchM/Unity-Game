@@ -40,11 +40,6 @@ public class PlayerMovement : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
-        if (!isGrounded)
-        {
-            Webswining();
-        }
-
         if (Input.GetButtonDown("Jump")) {
 
             if (WallStick)
@@ -111,54 +106,6 @@ public class PlayerMovement : MonoBehaviour
             rb.gravityScale = 2;
         }
     }
-
-
-    private bool isSwinging = false;
-    private Vector2 webSwingPosition;
-    private float webSwingSpeed = 2.0f; 
-
-    private void Webswining()
-    {
-        if (Input.GetButtonDown("Fire2"))
-        {
-            isSwinging = true;
-            webSwingPosition = transform.position;
-            rb.velocity = Vector2.zero;
-        }
-
-        if (isSwinging)
-        {
-            float horizontalInput = Input.GetAxis("Horizontal");
-            float verticalInput = Input.GetAxis("Vertical");
-            Vector2 webSwingDirection = (webSwingPosition - (Vector2)transform.position).normalized;
-
-            
-            float angle = Time.time * webSwingSpeed;
-            float radius = 2.0f; 
-            Vector2 circleOffset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
-
-           
-            Vector2 newPlayerPosition = webSwingPosition + circleOffset;
-
-            
-            rb.MovePosition(newPlayerPosition);
-
-            
-            webSwingDirection += new Vector2(horizontalInput, verticalInput).normalized * 0.2f;
-
-           
-            rb.AddForce(webSwingDirection * 3f);
-
-            if (Input.GetButtonUp("Fire2"))
-            {
-                isSwinging = false;
-                rb.velocity = Vector2.zero;
-                rb.gravityScale = 2;
-            }
-        }
-    }
-
-
 
     private void UpdateAnimationState()
     {
