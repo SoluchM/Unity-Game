@@ -39,11 +39,11 @@ public class ShootingScript : MonoBehaviour
                 currentBullet.GetComponent<Rigidbody2D>().velocity = returnDirection * bulletSpeed;
 
                 float distanceToInitial = Vector3.Distance(initialPosition, currentBullet.transform.position);
-                if (distanceToInitial < 0.1f)
+                if (distanceToInitial < 0.1f || Vector3.Distance(playerObj.transform.position, currentBullet.transform.position) < 0.1f)
                 {
                     Destroy(currentBullet);
                     isBulletReturning = false;
-                    isBulletFired = false; // Ustawiamy, ¿e mo¿na strzeliæ ponownie po zniszczeniu pocisku.
+                    isBulletFired = false;
                 }
             }
             else
