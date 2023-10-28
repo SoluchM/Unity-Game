@@ -1,63 +1,72 @@
 using UnityEngine;
+using UnityEngine.U2D;
+using System.Collections;
 
 public class ShootingScript : MonoBehaviour
 {
     public GameObject bulletPrefab;
-    public float bulletSpeed = 10f;
-    public float maxDistance = 10f;
-    public float cooldownTime = 1f;
-    private float lastShotTime;
+    private SpriteRenderer sprite;
+    private int bulletSpeed = 20;
 
-    private Vector3 initialPlayerPosition;
+    private GameObject playerObj;
     private GameObject currentBullet;
+    private Vector3 initialPosition;
+    private bool isBulletReturning = false;
+    private bool isBulletFired = false;
+    private Vector2 shootDirection;
+
+    private PlayerMovement playerMovement;
 
     void Start()
     {
-        initialPlayerPosition = transform.position;
+        playerObj = GameObject.Find("Player");
+        sprite = GetComponent <SpriteRenderer>();
+        playerMovement = playerObj.GetComponent<PlayerMovement>();
     }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time - lastShotTime >= cooldownTime)
+        if (!isBulletFired && Input.GetMouseButtonDown(0))
         {
-            lastShotTime = Time.time;
             Shoot();
         }
 
         if (currentBullet != null)
         {
-            ReturnBullet();
+            if (isBulletReturning)
+            {
+                Vector2 returnDirection = (playerObj.transform.position - currentBullet.transform.position).normalized;
+                currentBullet.GetComponent<Rigidbody2D>().velocity = returnDirection * bulletSpeed;
+
+                float distanceToInitial = Vector3.Distance(initialPosition, currentBullet.transform.position);
+                if (distanceToInitial < 0.1f)
+                {
+                    Destroy(currentBullet);
+                    isBulletReturning = false;
+                    isBulletFired = false; // Ustawiamy, ¿e mo¿na strzeliæ ponownie po zniszczeniu pocisku.
+                }
+            }
+            else
+            {
+                float distance = Vector3.Distance(initialPosition, currentBullet.transform.position);
+                if (distance >= 30f)
+                {
+                    isBulletReturning = true;
+                }
+            }
         }
     }
 
     void Shoot()
     {
-        Vector3 shootingDirection = transform.right; // Strzelanie w kierunku, w którym zwrócony jest gracz.
-
         currentBullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
         Rigidbody2D bulletRigidbody = currentBullet.GetComponent<Rigidbody2D>();
-        bulletRigidbody.velocity = shootingDirection * bulletSpeed;
-    }
+        initialPosition = transform.position;
 
-    void ReturnBullet()
-    {
-        if (currentBullet == null)
-        {
-            return;
-        }
+        shootDirection = playerMovement.GetFacingDirection() == PlayerMovement.FacingDirection.Left ? Vector2.left : Vector2.right;
 
-        // Sprawdzanie, czy pocisk przekroczy³ maksymalny dystans.
-        if (Vector2.Distance(currentBullet.transform.position, initialPlayerPosition) >= maxDistance)
-        {
-            Destroy(currentBullet); // Zniszcz pocisk, gdy przekroczy maksymalny dystans.
-        }
-    }
+        bulletRigidbody.velocity = shootDirection * bulletSpeed;
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Buildings"))
-        {
-            Destroy(currentBullet); // Zniszcz pocisk po zderzeniu z budynkiem.
-        }
+        isBulletFired = true;
     }
 }

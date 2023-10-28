@@ -13,11 +13,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpForce = 12f;
     [SerializeField] private float sprint = 4f;
-    private enum MovementState { idle, running, jumping, falling, doublejump, wallstick}
+    private enum MovementState { idle, running, jumping, falling, doublejump,}
     private bool isSprinting = false;
     private bool isGrounded = false;
     private int DoubleJump = 0;
-    private bool WallStick = false;
     private GameObject playerObj = null;
 
 
@@ -36,21 +35,11 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
         if (Input.GetButtonDown("Jump")) {
 
-            if (WallStick)
-            {
-                rb.gravityScale = 2;
-                JumpSoundEffect.Play();
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce - 2f);
-                WallStick = false;
-            }
-            else
-            {
                 while (DoubleJump < 3)
                 {
                     JumpSoundEffect.Play();
@@ -59,12 +48,12 @@ public class PlayerMovement : MonoBehaviour
                 }
 
             }
-    }
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)  
             {
                 isSprinting = true;
             }
-            else if (Input.GetKeyUp(KeyCode.LeftShift))
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
             {
                 isSprinting = false;
             }
@@ -72,7 +61,6 @@ public class PlayerMovement : MonoBehaviour
 
         UpdateAnimationState();
 
-        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -81,15 +69,6 @@ public class PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             DoubleJump = 0;
-            WallStick= false;
-        }
-
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            rb.velocity = new Vector2(playerObj.transform.position.x, 0);
-            rb.gravityScale = 0;
-            DoubleJump = 0;
-            WallStick = true;
         }
     }
 
@@ -100,13 +79,21 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = false;
             DoubleJump = 0;
         }
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            WallStick = false;
-            rb.gravityScale = 2;
-        }
     }
 
+    public enum FacingDirection { Left, Right }
+
+    public FacingDirection GetFacingDirection()
+    {
+        if (sprite.flipX)
+        {
+            return FacingDirection.Left;
+        }
+        else
+        {
+            return FacingDirection.Right;
+        }
+    }
     private void UpdateAnimationState()
     {
         MovementState state;
@@ -126,7 +113,7 @@ public class PlayerMovement : MonoBehaviour
             state = MovementState.idle;
         }
 
-        if (WallStick == false && !isGrounded && rb.velocity.y > .1f)
+        if (!isGrounded && rb.velocity.y > .1f)
         {
             state = MovementState.jumping;
             if (DoubleJump > 2 && !isGrounded)
@@ -134,13 +121,9 @@ public class PlayerMovement : MonoBehaviour
                 state = MovementState.doublejump;
             }
         }
-        else if (rb.velocity.y < -.1f && WallStick == false)
+        else if (rb.velocity.y < -.1f)
         {
             state = MovementState.falling;
-        }
-        if(WallStick == true)
-        {
-            state = MovementState.wallstick;
         }
 
         anim.SetInteger("state", (int)state);
