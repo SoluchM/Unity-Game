@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     private int DoubleJump = 0;
     private bool WallStick = false;
     private GameObject playerObj = null;
+    private bool webswing = false;
 
 
     [SerializeField] private AudioSource JumpSoundEffect;
@@ -30,8 +31,7 @@ public class PlayerMovement : MonoBehaviour
         sprite = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
 
-        if (playerObj == null)
-            playerObj = GameObject.Find("Player");
+        if (playerObj == null) playerObj = GameObject.Find("Player");
     }
 
     // Update is called once per frame
@@ -41,28 +41,32 @@ public class PlayerMovement : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * (isSprinting ? moveSpeed + sprint : moveSpeed), rb.velocity.y);
 
-        if (Input.GetButtonDown("Jump"))
+        if (!isGrounded)
+        {
+            Webswining();
+        }
+
+        if (Input.GetButtonDown("Jump")) {
+
             if (WallStick)
             {
                 rb.gravityScale = 2;
                 JumpSoundEffect.Play();
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce -2f);
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce - 2f);
                 WallStick = false;
             }
             else
             {
+                while (DoubleJump < 3)
                 {
-                    while (DoubleJump < 3)
-                    {
-                        JumpSoundEffect.Play();
-                        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                        DoubleJump++;
-                    }
-
+                    JumpSoundEffect.Play();
+                    rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                    DoubleJump++;
                 }
-            }
 
-            if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
+            }
+    }
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isGrounded)
             {
                 isSprinting = true;
             }
@@ -106,6 +110,52 @@ public class PlayerMovement : MonoBehaviour
         {
             WallStick = false;
             rb.gravityScale = 2;
+        }
+    }
+
+
+    private bool isSwinging = false;
+    private Vector2 webSwingPosition;
+    private float webSwingSpeed = 2.0f; // Dostosuj prêdkoœæ bujania siê wed³ug potrzeb
+
+    private void Webswining()
+    {
+        if (Input.GetButtonDown("Fire2"))
+        {
+            isSwinging = true;
+            webSwingPosition = transform.position;
+            rb.velocity = Vector2.zero;
+        }
+
+        if (isSwinging)
+        {
+            float horizontalInput = Input.GetAxis("Horizontal");
+            float verticalInput = Input.GetAxis("Vertical");
+            Vector2 webSwingDirection = (webSwingPosition - (Vector2)transform.position).normalized;
+
+            // Calculate the circular motion
+            float angle = Time.time * webSwingSpeed;
+            float radius = 2.0f; // Dostosuj promieñ pajêczyny wed³ug potrzeb
+            Vector2 circleOffset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+
+            // Calculate the new position of the player
+            Vector2 newPlayerPosition = webSwingPosition + circleOffset;
+
+            // Move the player towards the new position
+            rb.MovePosition(newPlayerPosition);
+
+            // Adjust the web swing direction based on player's input
+            webSwingDirection += new Vector2(horizontalInput, verticalInput).normalized * 0.2f;
+
+            // Apply force towards the web swing direction
+            rb.AddForce(webSwingDirection * 3f);
+
+            if (Input.GetButtonUp("Fire2"))
+            {
+                isSwinging = false;
+                rb.velocity = Vector2.zero;
+                rb.gravityScale = 2;
+            }
         }
     }
 
