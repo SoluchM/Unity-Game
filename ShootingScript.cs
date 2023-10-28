@@ -70,3 +70,5 @@ public class ShootingScript : MonoBehaviour
         isBulletFired = true;
     }
 }
+
+//do poprawy powracanie bullet oraz odbijanie od œcian
