@@ -19,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
     private int DoubleJump = 0;
     private bool WallStick = false;
     private GameObject playerObj = null;
-    private bool webswing = false;
 
 
     [SerializeField] private AudioSource JumpSoundEffect;
@@ -116,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isSwinging = false;
     private Vector2 webSwingPosition;
-    private float webSwingSpeed = 2.0f; // Dostosuj prêdkoœæ bujania siê wed³ug potrzeb
+    private float webSwingSpeed = 2.0f; 
 
     private void Webswining()
     {
@@ -133,21 +132,21 @@ public class PlayerMovement : MonoBehaviour
             float verticalInput = Input.GetAxis("Vertical");
             Vector2 webSwingDirection = (webSwingPosition - (Vector2)transform.position).normalized;
 
-            // Calculate the circular motion
+            
             float angle = Time.time * webSwingSpeed;
-            float radius = 2.0f; // Dostosuj promieñ pajêczyny wed³ug potrzeb
+            float radius = 2.0f; 
             Vector2 circleOffset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
-            // Calculate the new position of the player
+           
             Vector2 newPlayerPosition = webSwingPosition + circleOffset;
 
-            // Move the player towards the new position
+            
             rb.MovePosition(newPlayerPosition);
 
-            // Adjust the web swing direction based on player's input
+            
             webSwingDirection += new Vector2(horizontalInput, verticalInput).normalized * 0.2f;
 
-            // Apply force towards the web swing direction
+           
             rb.AddForce(webSwingDirection * 3f);
 
             if (Input.GetButtonUp("Fire2"))
