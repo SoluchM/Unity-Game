@@ -14,9 +14,13 @@ public class ShootingScript : MonoBehaviour
     private bool isBulletReturning = false;
     private bool isBulletFired = false;
     private Vector2 shootDirection;
+    
 
     private PlayerMovement playerMovement;
-
+    public void BulletBounced()
+    {
+        isBulletReturning = true;
+    }
     void Start()
     {
         playerObj = GameObject.Find("Player");
@@ -70,5 +74,3 @@ public class ShootingScript : MonoBehaviour
         isBulletFired = true;
     }
 }
-
-//do poprawy powracanie bullet oraz odbijanie od œcian
