@@ -18,7 +18,7 @@ public class BulletBounce : MonoBehaviour
             rb.velocity = reflectDirection;
             hasBounced = true;
 
-            // Informuj ShootingScript o odbiciu pocisku
+            
             ShootingScript shootingScript = FindObjectOfType<ShootingScript>();
             if (shootingScript != null)
             {
