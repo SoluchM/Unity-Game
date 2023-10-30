@@ -10,8 +10,8 @@ public class PlayerMovement : MonoBehaviour
     private Animator anim;
 
     private float dirX = 0f;
-    [SerializeField] private float moveSpeed = 7f;
-    [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private float moveSpeed = 6f;
+    [SerializeField] private float jumpForce = 20f;
     [SerializeField] private float sprint = 4f;
     private enum MovementState { idle, running, jumping, falling, doublejump,}
     private bool isSprinting = false;
