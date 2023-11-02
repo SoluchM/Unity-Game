@@ -7,14 +7,13 @@ public class Enemy : MonoBehaviour
     private SpriteRenderer sprite;
 
     [SerializeField] private GameObject[] waypoints;
-    private int currentWaypointIndex = 0;
-
+    public int currentWaypointIndex = 0;
 
     [SerializeField] private float speed = 2f;
     private bool shouldMove = true;
 
 
-    private void Start()
+    public void Start()
     {
         sprite = GetComponent<SpriteRenderer>();
     }
@@ -38,12 +37,10 @@ public class Enemy : MonoBehaviour
         if (currentWaypointIndex == 1)
         {
             sprite.flipX = false;
-            Debug.Log("prawo");
         }
         else if (currentWaypointIndex < 1)
         {
             sprite.flipX = true;
-            Debug.Log("lewo");
         }
         //do obrócenia jeszcze fieldofview nastêpnym razem
 
